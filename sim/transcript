@@ -1,0 +1,30 @@
+do run.do
+# ** Warning: (vlib-34) Library already exists at "work".
+# Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 09:32:33 on Feb 14,2019
+# vcom -reportprogress 300 -93 -explicit -work work ../hdl/HalfAdder.vhd 
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Compiling entity HalfAdder
+# -- Compiling architecture Behavior of HalfAdder
+# End time: 09:32:33 on Feb 14,2019, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim HalfAdder 
+# Start time: 09:32:33 on Feb 14,2019
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading work.halfadder(behavior)
+# .main_pane.structure.interior.cs.body.struct
+# .main_pane.objects.interior.cs.body.tree
+# .main_pane.wave.interior.cs.body.pw.wf
+# ** Warning: (vsim-3116) Problem reading symbols from linux-gate.so.1 : can not open ELF file.
+vlog --help
+# Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+# ** Error (suppressible): (vlog-1902) Option "--help" is either unknown, requires an argument, or was given with a bad argument.
+# Use the -help option for complete vlog usage.
+# Errors: 1, Warnings: 0
+# /opt/Modelsim/modelsim_ase/linuxaloem/vlog failed.
+# End time: 14:19:07 on Feb 14,2019, Elapsed time: 4:46:34
+# Errors: 1, Warnings: 1
