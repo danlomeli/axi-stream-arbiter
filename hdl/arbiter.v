@@ -23,53 +23,56 @@ module arbiter
 );
 
 
-reg [31:0] dat0_nxt, m0k_data1;
+wire [31:0] dat0_nxt;
+reg  [31:0] dat0;
 wire en0, sle0;
+// Targets
+wire ack0;
+wire req0;
+// Initiators
+wire ack1;
+reg req1;
+// 
+assign en0 = req0 & ack0;
+assign ack0 = ~req1 | ack1;
+// Regs
+always @(posedge axis_aclk or negedge axis_aresetn) if (~axis_aresetn) req1 <= 1'b0; else req1 <= ~ack0 | req0;
+always @(posedge axis_aclk) if (en0) dat0 <= dat0_nxt;
 
-wire m0k_r1;
-reg m0k_v1;
-wire s0m_r1;
-reg s0m_v1;
-
-assign en0 = s0m_v1 & s0m_r1;
-assign s0m_r1 = ~m0k_v1 | m0k_r1;
-always @(posedge axis_aclk or negedge axis_aresetn) if (~axis_aresetn) m0k_v1 <= 1'b0; else m0k_v1 <= ~s0m_r1 | s0m_v1;
-
-always @(posedge axis_aclk) if (en0) m0k_data1 <= dat0_nxt;
-
-// Master
-assign m0k_r1 = m0k_axis_tready;
-assign m0k_axis_tvalid = m0k_v1;
-assign m0k_axis_tdata = m0k_data1;
-
-
-assign dat0_nxt = (sle0) ? s0a_axis_tdata : s0b_axis_tdata;
+// Initiators
+assign ack1 = m0k_axis_tready;
+assign m0k_axis_tvalid = req1;
+assign m0k_axis_tdata = dat0;
 
 
-// Now assign s0m_data1, s0m_v1 the correct values.
+// assign dat0_nxt = (sle0) ? s0a_axis_tdata : s0b_axis_tdata;
 
-parameter  IDLE  = 3'b000,
-           READA = 3'b010,
-           READB = 3'b100;
+wire dat0_tlast;
 
-reg [2:0] state, next;
+
+elbuf u_elbuf0(
+	.clk      (axis_aclk       ),
+    .reset_n  (axis_aresetn    ),
+    // Targets
+    .s0_data  ({s0a_axis_tlast, s0a_axis_tdata}),
+    .s0_valid (s0a_axis_tvalid ),
+    .s0_ready (s0a_axis_tready ),
+    // Initiators
+    .m0_data ({dat0_tlast, dat0_nxt}),
+    .m0_valid (req0),
+    .m0_ready (ack0)
+);
+
+
+parameter S0 = 5'b1_0_10_0;
+
+reg [4:0] state, state_nxt;
 always @(posedge axis_aclk or negedge axis_aresetn) begin
-    if (~axis_aresetn) state <= IDLE;
-    else               state <= next;
+    if (~axis_aresetn) state <= S0;
+    else               state <= state_nxt;
 end
- 
-always @* begin
-    case (state)
-    IDLE : begin
-        next = IDLE;
-        if (s0a_axis_tvalid & s0a_axis_tready) next = READA;
-        if (s0b_axis_tvalid & s0b_axis_tready) next = READB;
-    end
-    READA : if (s0a_axis_tlast) next = IDLE;
-    READB : if (s0b_axis_tlast) next = IDLE;
-    default : next = IDLE;
-    endcase
-end
+
+
 
 endmodule
 `default_nettype wire

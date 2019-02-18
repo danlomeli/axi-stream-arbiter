@@ -6,11 +6,14 @@
 vlib work
 
 # 2) Compile the half adder
+vlog -work work ../hdl/eb15_ctrl.v
+vlog -work work ../hdl/elbuf_ctrl.v
+vlog -work work ../hdl/elbuf.v
 vlog -work work ../hdl/arbiter.v
-vlog -sv -work work ../hdl/arbiter_tb.sv
+vlog -sv -work work arbiter_tb.sv
 
 # 3) Load it for simulation
-vsim HalfAdder
+vsim arbiter_tb
 
 # 4) Open some selected windows for viewing
 view structure
@@ -24,6 +27,8 @@ view wave
 # add wave -noupdate -divider -height 32 Outputs
 # add wave -noupdate s
 # add wave -noupdate c
+
+do wave.do
 
 # 6) Set some test patterns
 
@@ -41,5 +46,8 @@ view wave
 # a = 1, b = 1 at 30 ns
 # force a 1 30
 
-# 7) Run the simulation for 40 ns
-run 40
+# 7) Logging signals
+log -r /*
+
+# 8) Run the simulation for 
+run 200 ns

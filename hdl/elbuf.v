@@ -2,34 +2,35 @@ module elbuf (
     // per node (target / initiator)
     input              clk,
     input              reset_n,
-    input       [31:0] t_0_dat,
-    input              t_0_req,
-    output             t_0_ack,
-    output      [31:0] i_1_dat,
-    output             i_1_req,
-    input              i_1_ack
+    input       [32:0] s0_data,
+    input              s0_valid,
+    output             s0_ready,
+    output      [32:0] m0_data,
+    output             m0_valid,
+    input              m0_ready
 );
-wire      [31:0] dat0, dat0_nxt;
+wire      [32:0] dat0, dat0_nxt;
 // per node
-assign dat0_nxt = t_0_dat; // node:0 is target port
-assign i_1_dat = dat0; // node:1 is initiator port
+assign dat0_nxt = s0_data; // node:0 is target port
+assign m0_data = dat0; // node:1 is initiator port
 
 wire en0_0, en0_1, sel0;
-reg [31:0] dat0_r0, dat0_r1;
+reg [32:0] dat0_r0, dat0_r1;
 always @(posedge clk) if (en0_0) dat0_r0 <= dat0_nxt;
 always @(posedge clk) if (en0_1) dat0_r1 <= dat0_nxt;
 
 assign dat0 = sel0 ? dat0_r1 : dat0_r0;
 
-elbuf_ctrl uctrl (
-    .clk(clk),
-    .reset_n(reset_n),
-    .t_0_req(t_0_req),
-    .t_0_ack(t_0_ack),
-    .i_1_req(i_1_req),
-    .i_1_ack(i_1_ack),
-    .en0_0(en0_0),
-    .en0_1(en0_1),
-    .sel0(sel0)
+elbuf_ctrl u_elbuf_ctrl(
+	.clk      (clk      ),
+    .reset_n  (reset_n  ),
+    .s0_valid (s0_valid ),
+    .s0_ready (s0_ready ),
+    .m0_valid (m0_valid ),
+    .m0_ready (m0_ready ),
+    .en0_0    (en0_0    ),
+    .en0_1    (en0_1    ),
+    .sel0     (sel0     )
 );
+
 endmodule // elbuf
