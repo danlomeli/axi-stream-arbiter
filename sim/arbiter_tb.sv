@@ -27,8 +27,9 @@ reg m0k_axis_tlast;
 always
 axis_aclk = #(PERIOD/2)~axis_aclk;
 
-task write(reg [31:0] data);
+task write(reg [31:0] data, reg tlast);
     s0a_axis_tdata <= data;
+    s0a_axis_tlast <= tlast;
     s0a_axis_tvalid <= 1'b1;
     while (1) begin
         @(posedge axis_aclk);
@@ -49,6 +50,8 @@ task reset_all();
     s0b_axis_tlast  = 0;
 endtask
 
+int burst_size = 10;
+
 initial begin 
     $display($time, " << Starting the Simulation >>");
     @(posedge axis_aclk);
@@ -56,8 +59,9 @@ initial begin
     repeat(2)@(posedge axis_aclk);
     axis_aresetn = 1'b1;
     repeat(5)@(posedge axis_aclk);
-    for (int idx = 0; idx < 10; idx++) begin
-        write(idx);
+    for (int idx = 1; idx <= burst_size; idx++) begin
+        if (idx == burst_size) write(idx, 1);
+        else write(idx, 0);
     end
     // $finish;
 end
