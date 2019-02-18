@@ -25,7 +25,10 @@ module arbiter
 
 wire [31:0] dat0_nxt;
 reg  [31:0] dat0;
-wire en0, sle0;
+wire [31:0] dat1_nxt;
+reg  [31:0] dat1;
+
+wire en0, sel0, en1, sel1;
 // Targets
 wire ack0;
 wire req0;
@@ -45,9 +48,9 @@ assign m0k_axis_tvalid = req1;
 assign m0k_axis_tdata = dat0;
 
 
-// assign dat0_nxt = (sle0) ? s0a_axis_tdata : s0b_axis_tdata;
+// assign dat0_nxt = (sel0) ? s0a_axis_tdata : s0b_axis_tdata;
 
-wire dat0_tlast;
+wire dat0_tlast, dat0_en, dat1_tlast, dat1_en;
 
 
 elbuf u_elbuf0(
@@ -63,16 +66,51 @@ elbuf u_elbuf0(
     .m0_ready (ack0)
 );
 
+assign dat0_en = req0 & ack0;
 
-parameter S0 = 5'b1_0_10_0;
+elbuf u_elbuf1(
+	.clk      (axis_aclk       ),
+    .reset_n  (axis_aresetn    ),
+    // Targets
+    .s0_data  ({s0b_axis_tlast, s0b_axis_tdata}),
+    .s0_valid (s0b_axis_tvalid ),
+    .s0_ready (s0b_axis_tready ),
+    // Initiators
+    .m0_data ({dat1_tlast, dat1_nxt}),
+    .m0_valid (),
+    .m0_ready ()
+);
 
-reg [4:0] state, state_nxt;
+// assign dat1_en = req1 & ack1;
+assign dat1_en = 0;
+
+
+parameter S0 = 2'b0_0;
+parameter S1 = 2'b1_0;
+parameter S2 = 2'b0_1;
+
+reg [1:0] state, state_nxt;
 always @(posedge axis_aclk or negedge axis_aresetn) begin
     if (~axis_aresetn) state <= S0;
     else               state <= state_nxt;
 end
 
+//  state   d0  d1  en0     en1     en    sel
+//  0       x   x   s_vld   0       0     0       0_0
+//  1       0   x   0       s_vld   1     0       1_0
+//  2       0   1   0       0       1     1       1_1
 
+always @*
+    casez({state, dat0_tlast, dat1_tlast, dat0_en, dat1_en})
+        {S0, 4'b??1?} : state_nxt = S1;
+        {S0, 4'b???1} : state_nxt = S2;
+        {S1, 4'b1?1?} : state_nxt = S0;
+        {S1, 4'b?1?1} : state_nxt = S0;
+        default       state_nxt = state;
+    endcase
+
+assign sel1 = state[0];
+assign en1 = state[1];
 
 endmodule
 `default_nettype wire
