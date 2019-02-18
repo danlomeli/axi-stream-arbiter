@@ -36,22 +36,7 @@ wire req0;
 wire ack1;
 reg req1;
 // 
-assign en0 = req0 & ack0;
-assign ack0 = ~req1 | ack1;
-// Regs
-always @(posedge axis_aclk or negedge axis_aresetn) if (~axis_aresetn) req1 <= 1'b0; else req1 <= ~ack0 | req0;
-always @(posedge axis_aclk) if (en0) dat0 <= dat0_nxt;
-
-// Initiators
-assign ack1 = m0k_axis_tready;
-assign m0k_axis_tvalid = req1;
-assign m0k_axis_tdata = dat0;
-
-
-// assign dat0_nxt = (sel0) ? s0a_axis_tdata : s0b_axis_tdata;
-
 wire dat0_tlast, dat0_en, dat1_tlast, dat1_en;
-
 
 elbuf u_elbuf0(
 	.clk      (axis_aclk       ),
@@ -111,6 +96,20 @@ always @*
 
 assign sel1 = state[0];
 assign en1 = state[1];
+
+assign dat0_nxt = (sel0) ? dat0_nxt : dat1_nxt;
+
+assign en0 = req0 & ack0;
+assign ack0 = ~req1 | ack1;
+// Regs
+always @(posedge axis_aclk or negedge axis_aresetn) if (~axis_aresetn) req1 <= 1'b0; else req1 <= ~ack0 | req0;
+always @(posedge axis_aclk) if (en0) dat0 <= dat0_nxt;
+
+// Initiators
+assign ack1 = m0k_axis_tready;
+assign m0k_axis_tvalid = req1;
+assign m0k_axis_tdata = dat0;
+
 
 endmodule
 `default_nettype wire
