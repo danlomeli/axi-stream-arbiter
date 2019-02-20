@@ -24,6 +24,9 @@ wire m0k_axis_tvalid;
 reg m0k_axis_tready = 1;
 reg m0k_axis_tlast;
 
+wire m0k_axis_a;
+wire m0k_axis_b;
+
 always
 axis_aclk = #(PERIOD/2)~axis_aclk;
 
@@ -50,7 +53,7 @@ task reset_all();
     s0b_axis_tlast  = 0;
 endtask
 
-int burst_size = 10;
+int burst_size = 11;
 
 initial begin 
     $display($time, " << Starting the Simulation >>");
