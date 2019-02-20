@@ -63,6 +63,11 @@ initial begin
         if (idx == burst_size) write(idx, 1);
         else write(idx, 0);
     end
+    repeat(5)@(posedge axis_aclk);
+    for (int idx = 1; idx <= burst_size; idx++) begin
+        if (idx == burst_size) write(idx, 1);
+        else write(idx, 0);
+    end
     // $finish;
 end
 
