@@ -53,7 +53,7 @@ task reset_all();
     s0b_axis_tlast  = 0;
 endtask
 
-int burst_size = 11;
+int burst_size = 10;
 
 initial begin 
     $display($time, " << Starting the Simulation >>");
