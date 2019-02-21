@@ -104,7 +104,6 @@ always @(posedge axis_aclk or negedge axis_aresetn)
 
 wire unlock, m_ready, m_valid, en0_0, en0_1, sel0;
 
-assign unlock = dat0_nlast;
 
 always @*
     casez({state, unlock, dat0_nreq, m_ready})
@@ -133,11 +132,15 @@ always @*
         default       state_nxt = state;
     endcase
 
+// arbiter
+reg unlock2;
 always @(posedge axis_aclk or negedge axis_aresetn) if (~axis_aresetn) arb <= 1'b0; else if (state_nxt == S5) arb <= ~arb;
+always @(posedge axis_aclk or negedge axis_aresetn) if (~axis_aresetn) unlock2 <= 1'b0; else if (state_nxt == S5) unlock2 <= 1'b0; else if (dat0_nlast) unlock2 <= 1'b1;
+assign unlock = dat0_nlast | unlock2;
 
-wire data0_nxt_tail;
+wire dat0_tail;
 
-assign data0_nxt_tail = state[5];
+assign dat0_tail = state[5];
 assign s_ready = state[4];
 assign m_valid = state[3];
 assign en0_0   = state[2] & dat0_nreq;
@@ -157,7 +160,7 @@ assign dat0_r = sel0 ? dat0_r1 : dat0_r0;
 assign m_ready = m0k_axis_tready;
 assign m0k_axis_tvalid = m_valid;
 assign m0k_axis_tdata = dat0_r;
-assign m0k_axis_tlast = data0_nxt_tail;
+assign m0k_axis_tlast = dat0_tail;
 assign m0k_axis_a = ~arb;
 assign m0k_axis_b = arb;
 

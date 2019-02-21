@@ -47,11 +47,12 @@ initial fp_a = $fopen("m0k_axis_tdata.mif","w");
 always_ff @(posedge axis_aclk) begin
     m0k_axis_tready <= (rand_ready) ? random_ready[0] : 1;
     if (m0k_axis_tready && m0k_axis_tvalid) begin
-        $fwrite(fp_a,"%h\n",m0k_axis_tdata);
+        if (m0k_axis_a) $fwrite(fp_a,"a %h\n",m0k_axis_tdata);
+        if (m0k_axis_b) $fwrite(fp_a,"b %h\n",m0k_axis_tdata);
     end
 end
 
-task write(logic [31:0] data, logic tlast);
+task writea(logic [31:0] data, logic tlast);
     s0a_axis_tdata <= data;
     s0a_axis_tlast <= tlast;
     s0a_axis_tvalid <= 1'b1;
@@ -62,6 +63,19 @@ task write(logic [31:0] data, logic tlast);
         end
     end
     s0a_axis_tvalid <= 1'b0;
+endtask
+
+task writeb(logic [31:0] data, logic tlast);
+    s0b_axis_tdata <= data;
+    s0b_axis_tlast <= tlast;
+    s0b_axis_tvalid <= 1'b1;
+    while (1) begin
+        @(posedge axis_aclk);
+        if (s0b_axis_tready) begin
+            break;
+        end
+    end
+    s0b_axis_tvalid <= 1'b0;
 endtask
 
 task reset_all();
@@ -85,16 +99,37 @@ initial begin
     axis_aresetn = 1'b1;
     repeat(5)@(posedge axis_aclk);
     for (int idx = 1; idx <= burst_size; idx++) begin
-        if (idx == burst_size) write(idx, 1);
-        else write(idx, 0);
+        if (idx == burst_size) writea(idx, 1);
+        else writea(idx, 0);
     end
     repeat(5)@(posedge axis_aclk);
     for (int idx = 1; idx <= burst_size; idx++) begin
-        if (idx == burst_size) write(idx, 1);
-        else write(idx, 0);
+        if (idx == burst_size) writea(idx, 1);
+        else writea(idx, 0);
     end
     // $finish;
 end
+
+initial begin 
+    fp_a = $fopen("m0k_axis_tdata.mif","w");
+    $display($time, " << Starting the Simulation >>");
+    @(posedge axis_aclk);
+    reset_all();
+    repeat(2)@(posedge axis_aclk);
+    axis_aresetn = 1'b1;
+    repeat(6)@(posedge axis_aclk);
+    for (int idx = 1; idx <= burst_size; idx++) begin
+        if (idx == burst_size) writeb(idx, 1);
+        else writeb(idx, 0);
+    end
+    repeat(10)@(posedge axis_aclk);
+    for (int idx = 1; idx <= burst_size; idx++) begin
+        if (idx == burst_size) writeb(idx, 1);
+        else writeb(idx, 0);
+    end
+    // $finish;
+end
+
 
 arbiter DUT(.*); //implicit port
 
@@ -119,7 +154,6 @@ always_ff @(posedge axis_aclk) begin
         counter1 <= {32{1'b0}};
 
         lfsr_pattern <= {1'b1,{5{1'b0}}}; // initializing lfsr by 100000
-
 
     end else begin
 
