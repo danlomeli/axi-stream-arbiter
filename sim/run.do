@@ -50,4 +50,4 @@ do wave.do
 log -r /*
 
 # 8) Run the simulation for 
-run 200 ns
+run 400 ns
