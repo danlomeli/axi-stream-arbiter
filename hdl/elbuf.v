@@ -1,5 +1,4 @@
 module elbuf (
-    // per node (target / initiator)
     input              clk,
     input              reset_n,
     input       [32:0] s0_data,
@@ -11,8 +10,8 @@ module elbuf (
 );
 wire      [32:0] dat0, dat0_nxt;
 // per node
-assign dat0_nxt = s0_data; // node:0 is target port
-assign m0_data = dat0; // node:1 is initiator port
+assign dat0_nxt = s0_data; 
+assign m0_data = dat0; 
 
 wire en0_0, en0_1, sel0;
 reg [32:0] dat0_r0, dat0_r1;
@@ -33,4 +32,4 @@ elbuf_ctrl u_elbuf_ctrl(
     .sel0     (sel0     )
 );
 
-endmodule // elbuf
+endmodule

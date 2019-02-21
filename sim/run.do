@@ -50,4 +50,4 @@ do wave.do
 log -r /*
 
 # 8) Run the simulation for 
-run 1 us
+run 1.5 us

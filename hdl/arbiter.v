@@ -98,7 +98,7 @@ always @(posedge axis_aclk or negedge axis_aresetn)
 //  2       0   1   0       1       0       0       0       0_0_1_00_0 #8
 //  3       x   0   1       1       s_vld   0       1       0_1_1_10_1 #29
 //  4       1   0   0       1       0       0       1       0_0_1_00_1 #9
-//  5       x   x   0       0       0       0       0       0_0_0_00_0 #0
+//  5       x   x   0       0       0       0       0       1_0_0_00_0 #0
 //  6       x   x   0       1       0       0       0       1_0_1_00_0 #40
 //  7       x   x   0       1       0       0       1       1_0_1_00_1 #41
 
@@ -114,8 +114,7 @@ always @*
         {S1, 3'b011} : state_nxt = S3;
         {S1, 3'b1?1} : state_nxt = S7;
 
-        {S2, 3'b0?1} : state_nxt = S3;
-        {S2, 3'b1?1} : state_nxt = S5;
+        {S2, 3'b??1} : state_nxt = S3;
 
         {S3, 3'b001} : state_nxt = S0;
         {S3, 3'b010} : state_nxt = S4;

@@ -47,8 +47,8 @@ initial fp_a = $fopen("m0k_axis_tdata.mif","w");
 always_ff @(posedge axis_aclk) begin
     m0k_axis_tready <= (rand_ready) ? random_ready[0] : 1;
     if (m0k_axis_tready && m0k_axis_tvalid) begin
-        if (m0k_axis_a) $fwrite(fp_a,"a %h\n",m0k_axis_tdata);
-        if (m0k_axis_b) $fwrite(fp_a,"b %h\n",m0k_axis_tdata);
+        if (m0k_axis_a) $fwrite(fp_a,"a %h %t\n",m0k_axis_tdata, $time);
+        if (m0k_axis_b) $fwrite(fp_a,"b %h %t\n",m0k_axis_tdata, $time);
     end
 end
 
@@ -88,7 +88,7 @@ task reset_all();
     s0b_axis_tlast  = 0;
 endtask
 
-int burst_size = 10;
+int burst_size = 31;
 
 initial begin 
     fp_a = $fopen("m0k_axis_tdata.mif","w");
